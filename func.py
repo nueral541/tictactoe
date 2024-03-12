@@ -16,21 +16,44 @@ def print_guide():
     print("7 | 8 | 9")
 
 def play_turn(player, gamestate):
-    if player == 'X':
-        move = input("play your turn, X. type 'idk' to bring up the guide:")
+    global move
+    move_made = False  # Flag to track if a valid move has been made
+    while not move_made:
+        print_board(gamestate)
+        move = input(f"Play your turn, {player}. Type 'idk' to bring up the guide:")
         if move == 'idk':
             print_guide()
-            print("heres the guide...")
+            print("Here's the guide...")
         else:
             try:
-                move -= 1
-                if gamestate[move] == 0:
-                    gamestate[move] = 1
-                    return gamestate
+                move = int(move) - 1  # Convert move to int and adjust for 0-based indexing
+                if 0 <= move <= 8 and gamestate[move] == 0:  # Check if move is within bounds and the cell is empty
+                    gamestate[move] = 1 if player == 'X' else -1
+                    move_made = True  # Valid move made, exit the loop
                 else:
-                    print("thats not a valid move")
-            except:
-                print("read the guide dumbass")
-                print_guide()
-    else:
-        pass
+                    print("That's not a valid move")
+            except ValueError:  # Catch ValueError if int conversion fails
+                print("Please enter a number between 1 and 9, or type 'idk' for the guide.")
+
+    return gamestate
+
+def asess_turn(gamestate):
+    # Check for 3 in a row horizontally, vertically, and diagonally
+    # Horizontal
+    for i in range(0, 9, 3):
+        if gamestate[i] == gamestate[i+1] == gamestate[i+2] != 0:
+            return gamestate[i]
+
+    # Vertical
+    for i in range(3):
+        if gamestate[i] == gamestate[i+3] == gamestate[i+6] != 0:
+            return gamestate[i]
+
+    # Diagonals
+    if gamestate[0] == gamestate[4] == gamestate[8] != 0:
+        return gamestate[0]
+    if gamestate[2] == gamestate[4] == gamestate[6] != 0:
+        return gamestate[2]
+
+    # No winner yet
+    return 0
